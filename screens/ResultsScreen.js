@@ -54,7 +54,7 @@ export default function ResultsScreen({ route, navigation }) {
             <View style={styles.foodGrid}>
               {plan.foundationFoods.map((food, i) => (
                 <View key={i} style={styles.foodChip}>
-                  <Text style={styles.foodChipText}>{food}</Text>
+                  <Text style={styles.foodChipText}>{food.name || food}</Text>
                 </View>
               ))}
             </View>
@@ -70,7 +70,10 @@ export default function ResultsScreen({ route, navigation }) {
             {plan.avoidFoods.map((food, i) => (
               <View key={i} style={styles.avoidRow}>
                 <Text style={styles.avoidX}>✕</Text>
-                <Text style={styles.avoidText}>{food}</Text>
+                <View>
+                  <Text style={styles.avoidText}>{food.name || food}</Text>
+                  {food.reason ? <Text style={styles.avoidReason}>{food.reason}</Text> : null}
+                </View>
               </View>
             ))}
           </View>
@@ -82,7 +85,20 @@ export default function ResultsScreen({ route, navigation }) {
               <Text style={styles.cardTitle}>Metabolic Timing</Text>
             </View>
             <Text style={styles.cardDesc}>Pre & post workout nutrition strategy</Text>
-            <Text style={styles.timingText}>{plan.metabolicTiming}</Text>
+            {typeof plan.metabolicTiming === 'object' ? (
+              <>
+                <Text style={styles.timingLabel}>Pre-Workout</Text>
+                <Text style={styles.timingText}>{plan.metabolicTiming.preWorkout}</Text>
+                <Text style={styles.timingLabel}>Post-Workout</Text>
+                <Text style={styles.timingText}>{plan.metabolicTiming.postWorkout}</Text>
+                <Text style={styles.timingLabel}>Fasting Window</Text>
+                <Text style={styles.timingText}>{plan.metabolicTiming.fastingWindow}</Text>
+                <Text style={styles.timingLabel}>Hydration</Text>
+                <Text style={styles.timingText}>{plan.metabolicTiming.hydration}</Text>
+              </>
+            ) : (
+              <Text style={styles.timingText}>{plan.metabolicTiming}</Text>
+            )}
           </View>
 
           {/* Sample Day Menu */}
@@ -98,8 +114,15 @@ export default function ResultsScreen({ route, navigation }) {
               { meal: '🌙 Dinner', content: plan.sampleMenu.dinner },
             ].map(({ meal, content }, i) => (
               <View key={i} style={styles.mealRow}>
-                <Text style={styles.mealLabel}>{meal}</Text>
-                <Text style={styles.mealContent}>{content}</Text>
+                <Text style={styles.mealLabel}>{meal}{content.name ? ` — ${content.name}` : ''}</Text>
+                {content.items ? (
+                  content.items.map((item, j) => (
+                    <Text key={j} style={styles.mealContent}>• {item}</Text>
+                  ))
+                ) : (
+                  <Text style={styles.mealContent}>{content}</Text>
+                )}
+                {content.macros ? <Text style={styles.mealMacros}>{content.macros}</Text> : null}
               </View>
             ))}
           </View>
@@ -256,8 +279,27 @@ const styles = StyleSheet.create({
   },
   mealContent: {
     color: '#ccccee',
-    fontSize: 15,
+    fontSize: 14,
     lineHeight: 22,
+    marginBottom: 2,
+  },
+  mealMacros: {
+    color: '#666688',
+    fontSize: 12,
+    marginTop: 6,
+    fontStyle: 'italic',
+  },
+  avoidReason: {
+    color: '#886677',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  timingLabel: {
+    color: '#e94560',
+    fontSize: 13,
+    fontWeight: '700',
+    marginTop: 12,
+    marginBottom: 4,
   },
   disclaimer: {
     color: '#44445a',
